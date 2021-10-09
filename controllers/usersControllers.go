@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -78,6 +80,8 @@ func (usersApi *UsersAPI) post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user.ID = primitive.NewObjectID()
+	hashedPassword := sha256.Sum256([]byte(user.Password))
+	user.Password = hex.EncodeToString(hashedPassword[:])
 	newUserResult, err := usersCollection.InsertOne(usersApi.ctx, user)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusNotFound, "Error creating user")
